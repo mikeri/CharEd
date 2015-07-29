@@ -19,7 +19,7 @@ class MainFrame ( wx.Frame ):
 	def __init__( self, parent ):
 		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Char Edit", pos = wx.DefaultPosition, size = wx.Size( 955,606 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
-		self.SetSizeHintsSz( wx.Size( 600,480 ), wx.DefaultSize )
+		self.SetSizeHintsSz( wx.Size( 450,450 ), wx.DefaultSize )
 		
 		bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
 		
@@ -142,10 +142,10 @@ class MainFrame ( wx.Frame ):
 		self.m_menubar1.Append( self.file, u"File" ) 
 		
 		self.edit = wx.Menu()
-		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from upper", wx.EmptyString, wx.ITEM_NORMAL )
+		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy all from upper", wx.EmptyString, wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copyupmenu )
 		
-		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from lower", wx.EmptyString, wx.ITEM_NORMAL )
+		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy all from lower", wx.EmptyString, wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copylomenu )
 		
 		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", wx.EmptyString, wx.ITEM_NORMAL )
@@ -171,6 +171,7 @@ class MainFrame ( wx.Frame ):
 		self.drawpanel.Bind( wx.EVT_KEY_UP, self.OnLeftDown )
 		self.drawpanel.Bind( wx.EVT_LEFT_DOWN, self.OnLeftDown )
 		self.drawpanel.Bind( wx.EVT_LEFT_UP, self.OnLeftUp )
+		self.drawpanel.Bind( wx.EVT_MOTION, self.drawmotion )
 		self.charset.Bind( wx.EVT_CHOICE, self.setcharset )
 		self.charchooser.Bind( wx.EVT_LIST_ITEM_FOCUSED, self.setchar )
 		self.Bind( wx.EVT_MENU, self.openfont, id = self.menuopen.GetId() )
@@ -202,6 +203,9 @@ class MainFrame ( wx.Frame ):
 	
 	
 	def OnLeftUp( self, event ):
+		event.Skip()
+	
+	def drawmotion( self, event ):
 		event.Skip()
 	
 	def setcharset( self, event ):

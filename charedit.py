@@ -30,6 +30,7 @@ charbits = []
 charnum = 0
 blocksize = 0
 charfilename = ''
+drawstate = False
 
 for line in range (0,8):
     charbits.append([0,0,0,0,0,0,0,0])
@@ -83,8 +84,30 @@ class CharEditFrame(gui.MainFrame):
         self.loadchars()
         event.Skip
 
+    def copyup(self,event):
+        global custchars
+        global upchars
+        custchars = upchars
+        event.Skip()
+
+    def copylo(self,event):
+        global custchars
+        global lochars
+        custchars = lochars
+        event.Skip()
+
     def status(self, text):
         self.statusbar.SetStatusText(text)
+        
+    def makereverse(self, event):
+        global custchars
+        custchars = custchars[:1024]
+        for byte in custchars[:1024]:
+            byteval = ord(byte)
+            reversedval = ~byteval & 255
+            reversedbyte = chr(reversedval)
+            custchars = custchars + reversedbyte
+        event.Skip()
 
     def savechars(self):
         global custchars
@@ -156,7 +179,6 @@ class CharEditFrame(gui.MainFrame):
             wxbitmap = wx.BitmapFromImage(wximage,1)
             self.imagelist.Replace(charnum, wxbitmap)
             self.charchooser.RefreshItem(charnum)
-
         
     def colormotion(self, event):
         #self.bgcolor.ClearSelection()
@@ -164,14 +186,38 @@ class CharEditFrame(gui.MainFrame):
         #pass
         event.Skip()
 
+    def clearall(self,event):
+        global custchars
+        clear = '{0:' + chr(0) + '<2048}'
+        custchars = clear.format('')
+
+    def OnLeftUp(self, event):
+        global charnum
+        global charset
+        self.drawpanel.ReleaseMouse()
+
     def OnLeftDown(self, event):
+        global drawstate
         x, y = event.GetPositionTuple()
         x = x / blocksize
         y = y / blocksize
-        if self.bitstate(x, y): self.flipbit(x, y, False)
-        else: self.flipbit(x, y, True)
-        #self.CaptureMouse()
+        if self.bitstate(x, y): 
+            self.flipbit(x, y, False)
+            drawstate = False
+        else: 
+            self.flipbit(x, y, True)
+            drawstate = True
+        self.drawpanel.CaptureMouse()
         #event.skip()
+
+    def drawmotion(self, event):
+        global drawstate
+        if event.Dragging() and event.LeftIsDown:
+            x, y = event.GetPositionTuple()
+            x = x / blocksize
+            y = y / blocksize
+            if drawstate: self.flipbit(x, y, True)
+            else: self.flipbit(x, y, False)
 
     def bitstate(self, x, y):
         line = charnum * 8 + y
