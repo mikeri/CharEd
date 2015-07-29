@@ -13,7 +13,7 @@ colors = [
         [7,(184, 199, 111),'yellow'],
         [8,(111, 79, 037),'orange'],
         [9,(067, 057, 000),'brown'],
-        [10,(154, 103, 89),'light red'],
+        [10,(154, 103, 89),'pink'],
         [11,(68, 68, 68),'dark grey'],
         [12,(108, 108, 108),'grey'],
         [13,(54, 210, 132),'light green'],
@@ -29,6 +29,7 @@ custchars = 0
 charbits = []
 charnum = 0
 blocksize = 0
+charfilename = ''
 
 for line in range (0,8):
     charbits.append([0,0,0,0,0,0,0,0])
@@ -68,6 +69,68 @@ class CharEditFrame(gui.MainFrame):
     def OnClose(self, event):
         self.Destroy()
 
+    def savefont(self, event):
+        global charfilename
+        if charfilename: self.savechars()
+        else: self.savecharsas()
+        event.Skip
+
+    def savefontas(self, event):
+        self.savecharsas()
+        event.Skip
+
+    def openfont(self, event):
+        self.loadchars()
+        event.Skip
+
+    def status(self, text):
+        self.statusbar.SetStatusText(text)
+
+    def savechars(self):
+        global custchars
+        global charfilename
+        try:
+            charfile = open(charfilename,'w')
+            charfile.write(custchars)
+            charfile.close()
+            self.status('Saved charset ' + charfilename + '.')
+        except:
+            self.status('Error saving ' + charfilename + '!')
+
+    def savecharsas(self):
+        global custchars
+        global charfilename
+        filereq = wx.FileDialog(self)
+        if filereq.ShowModal() == wx.ID_OK:
+            charfilename = filereq.GetPath()
+            filename = filereq.GetFilename()
+            try:
+                charfile = open(charfilename,'w')
+                charfile.write(custchars)
+                charfile.close()
+                self.status('Saved charset ' + filename + '.')
+            except:
+                self.status('Error saving ' + filename + '!')
+        else: self.status('Save cancelled')
+        filereq.Destroy()
+
+    def loadchars(self):
+        global charfilename
+        global custchars
+        filereq = wx.FileDialog(self)
+        if filereq.ShowModal() == wx.ID_OK:
+            charfilename = filereq.GetPath()
+            filename = filereq.GetFilename()
+            try:
+                charfile = open(charfilename,'r')
+                custchars = charfile.read()
+                charfile.close()
+                self.status('Loaded charset ' + filename + '.')
+            except:
+                self.status('Error loading ' + filename + '!')
+        else: self.status('Load cancelled')
+        filereq.Destroy()
+
     def rendercharset(self, charset):
         self.charchooser.ClearAll()
         self.charchooser.InsertColumn(0,'Ch',width=25)
@@ -93,6 +156,7 @@ class CharEditFrame(gui.MainFrame):
             wxbitmap = wx.BitmapFromImage(wximage,1)
             self.imagelist.Replace(charnum, wxbitmap)
             self.charchooser.RefreshItem(charnum)
+
         
     def colormotion(self, event):
         #self.bgcolor.ClearSelection()
@@ -203,12 +267,14 @@ class CharEditFrame(gui.MainFrame):
             global fgcolor
             fgcolor = event.GetCol() + 8 * event.GetRow()
             self.Refresh()
+            self.status("Foreground color: " + colors[fgcolor][2])
             event.Skip()
 
     def setbgcolor( self, event ):
             global bgcolor
             bgcolor = event.GetCol() + 8 * event.GetRow()
             self.Refresh()
+            self.status("Background color: " + colors[bgcolor][2])
             event.Skip()
 
     def extractchar(self,charnum):

@@ -89,19 +89,6 @@ class MainFrame ( wx.Frame ):
 		
 		bSizer2.Add( self.fgcolor, 1, wx.ALL, 5 )
 		
-		bSizer5 = wx.BoxSizer( wx.VERTICAL )
-		
-		self.m_staticText1 = wx.StaticText( self, wx.ID_ANY, u"Size", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText1.Wrap( -1 )
-		bSizer5.Add( self.m_staticText1, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
-		
-		sizechoiceChoices = [ u"1x1", u"1x2", u"2x1", u"2x2" ]
-		self.sizechoice = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, sizechoiceChoices, 0 )
-		self.sizechoice.SetSelection( 0 )
-		bSizer5.Add( self.sizechoice, 0, wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5 )
-		
-		bSizer2.Add( bSizer5, 2, wx.EXPAND, 5 )
-		
 		bSizer26.Add( bSizer2, 0, 0, 5 )
 		
 		bSizerDraw = wx.BoxSizer( wx.VERTICAL )
@@ -143,14 +130,35 @@ class MainFrame ( wx.Frame ):
 		self.menuopen = wx.MenuItem( self.file, wx.ID_ANY, u"Open", wx.EmptyString, wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuopen )
 		
+		self.menusave = wx.MenuItem( self.file, wx.ID_ANY, u"Save", wx.EmptyString, wx.ITEM_NORMAL )
+		self.file.AppendItem( self.menusave )
+		
+		self.saveasmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save as...", wx.EmptyString, wx.ITEM_NORMAL )
+		self.file.AppendItem( self.saveasmenu )
+		
 		self.menuexit = wx.MenuItem( self.file, wx.ID_ANY, u"Exit", wx.EmptyString, wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		
 		self.m_menubar1.Append( self.file, u"File" ) 
 		
+		self.edit = wx.Menu()
+		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from upper", wx.EmptyString, wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.copyupmenu )
+		
+		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from lower", wx.EmptyString, wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.copylomenu )
+		
+		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", wx.EmptyString, wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.reversemenu )
+		
+		self.clearallmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Clear all chars", wx.EmptyString, wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.clearallmenu )
+		
+		self.m_menubar1.Append( self.edit, u"Edit" ) 
+		
 		self.SetMenuBar( self.m_menubar1 )
 		
-		self.m_statusBar1 = self.CreateStatusBar( 1, wx.ST_SIZEGRIP, wx.ID_ANY )
+		self.statusbar = self.CreateStatusBar( 1, wx.ST_SIZEGRIP, wx.ID_ANY )
 		
 		self.Centre( wx.BOTH )
 		
@@ -166,6 +174,12 @@ class MainFrame ( wx.Frame ):
 		self.charset.Bind( wx.EVT_CHOICE, self.setcharset )
 		self.charchooser.Bind( wx.EVT_LIST_ITEM_FOCUSED, self.setchar )
 		self.Bind( wx.EVT_MENU, self.openfont, id = self.menuopen.GetId() )
+		self.Bind( wx.EVT_MENU, self.savefont, id = self.menusave.GetId() )
+		self.Bind( wx.EVT_MENU, self.savefontas, id = self.saveasmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.copyup, id = self.copyupmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.copylo, id = self.copylomenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.clearall, id = self.clearallmenu.GetId() )
 	
 	def __del__( self ):
 		pass
@@ -197,6 +211,24 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def openfont( self, event ):
+		event.Skip()
+	
+	def savefont( self, event ):
+		event.Skip()
+	
+	def savefontas( self, event ):
+		event.Skip()
+	
+	def copyup( self, event ):
+		event.Skip()
+	
+	def copylo( self, event ):
+		event.Skip()
+	
+	def makereverse( self, event ):
+		event.Skip()
+	
+	def clearall( self, event ):
 		event.Skip()
 	
 
