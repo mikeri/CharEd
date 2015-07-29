@@ -123,7 +123,7 @@ class CharEditFrame(gui.MainFrame):
     def savecharsas(self):
         global custchars
         global charfilename
-        filereq = wx.FileDialog(self)
+        filereq = wx.FileDialog(self,style=wx.FD_SAVE)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
@@ -140,7 +140,7 @@ class CharEditFrame(gui.MainFrame):
     def loadchars(self):
         global charfilename
         global custchars
-        filereq = wx.FileDialog(self)
+        filereq = wx.FileDialog(self,style=wx.FD_OPEN)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
