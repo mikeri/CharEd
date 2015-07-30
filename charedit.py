@@ -61,6 +61,7 @@ class CharEditFrame(gui.MainFrame):
                 col = 0
 
         self.Bind(wx.EVT_MENU, self.OnClose, self.menuexit )
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_PAINT, self.on_paint)
         
         self.rendercharset(upchars)
@@ -68,6 +69,7 @@ class CharEditFrame(gui.MainFrame):
 #        self.bgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
 
     def OnClose(self, event):
+        print('close')
         self.Destroy()
 
     def savefont(self, event):
@@ -190,11 +192,12 @@ class CharEditFrame(gui.MainFrame):
         global custchars
         clear = '{0:' + chr(0) + '<2048}'
         custchars = clear.format('')
+        event.Skip()
 
     def OnLeftUp(self, event):
         global charnum
         global charset
-        self.drawpanel.ReleaseMouse()
+        #self.drawpanel.ReleaseMouse()
 
     def OnLeftDown(self, event):
         global drawstate
@@ -207,8 +210,7 @@ class CharEditFrame(gui.MainFrame):
         else: 
             self.flipbit(x, y, True)
             drawstate = True
-        self.drawpanel.CaptureMouse()
-        #event.skip()
+        #self.drawpanel.CaptureMouse()
 
     def drawmotion(self, event):
         global drawstate
@@ -236,15 +238,8 @@ class CharEditFrame(gui.MainFrame):
         else:
             custchars = custchars[:charnum * 8 + y] + byte + custchars[charnum * 8 + y + 1:]
         self.updatechar(charnum)
-        self.pixeldraw(x, y, state)
-
-    def pixeldraw(self, x, y, state):
-        chardraw = wx.AutoBufferedPaintDC(self.drawpanel)
-        if state: chardraw.SetBrush(wx.Brush(colors[fgcolor][1]))
-        else: chardraw.SetBrush(wx.Brush(colors[bgcolor][1]))
-        blocksize = drawsize / 8
-        chardraw.DrawRectangle(x * blocksize, y * blocksize,
-                               blocksize + 1,blocksize + 1)
+        #self.pixeldraw(x, y, state)
+        self.Refresh()
 
     def encodebyte(self, bits):
         bitval = 1
@@ -265,7 +260,6 @@ class CharEditFrame(gui.MainFrame):
                     2: custchars}
         self.rendercharset(chardict[setnum])
         chars = chardict[setnum]
-        self.Refresh()
         event.Skip()
 
     def setchar(self, event):
@@ -273,7 +267,6 @@ class CharEditFrame(gui.MainFrame):
         charnum = event.Index
         if charnum < 0: charnum = 0
         self.extractchar(charnum)
-        self.Refresh()
         event.Skip()
 
     def on_paint(self, event):
@@ -282,6 +275,12 @@ class CharEditFrame(gui.MainFrame):
         global drawsize
         global blocksize
         global charnum
+        def pixeldraw(x, y, state):
+            if state: chardraw.SetBrush(wx.Brush(colors[fgcolor][1]))
+            else: chardraw.SetBrush(wx.Brush(colors[bgcolor][1]))
+            blocksize = drawsize / 8
+            chardraw.DrawRectangle(x * blocksize, y * blocksize,
+                                                         blocksize + 1,blocksize + 1)
         self.extractchar(charnum)
         #self.charbm = wx.EmptyBitmap(64, 64, 1)
         self.drawpanel.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
@@ -295,19 +294,16 @@ class CharEditFrame(gui.MainFrame):
         self.drawpanel.SetClientSize((x, x))
         drawsize, dummy = self.drawpanel.GetClientSize()
     
+        chardraw.SetPen(wx.Pen(wx.BLACK))
         for line in range (0, drawsize, drawsize / 8):
-            chardraw.SetPen(wx.Pen(wx.BLACK))
             chardraw.DrawLine(0,line,drawsize,line)
             chardraw.DrawLine(line,0,line,drawsize)
 
-        chardraw.SetBrush(wx.Brush(colors[fgcolor][1]))
         blocksize = drawsize / 8
 
         for bit in range (0,8):
             for line in range (0,8):
-                if charbits[line][bit]:
-                    chardraw.DrawRectangle(bit * blocksize, line * blocksize,
-                                           blocksize + 1,blocksize + 1)
+                pixeldraw(bit,line,charbits[line][bit])
 
     def setfgcolor( self, event ):
             global fgcolor
@@ -347,7 +343,7 @@ class CharEditFrame(gui.MainFrame):
         bits.reverse()
         return bits
 
-app = wx.App()# Error messages go to popup window
+app = wx.App(None)
 top = CharEditFrame(None)
 top.Show()
 app.MainLoop()
