@@ -17,17 +17,20 @@ import wx.grid
 class MainFrame ( wx.Frame ):
 	
 	def __init__( self, parent ):
-		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Char Edit", pos = wx.DefaultPosition, size = wx.Size( 955,606 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
+		wx.Frame.__init__ ( self, parent, id = wx.ID_ANY, title = u"Char Edit", pos = wx.DefaultPosition, size = wx.Size( 600,500 ), style = wx.DEFAULT_FRAME_STYLE|wx.TAB_TRAVERSAL )
 		
 		self.SetSizeHintsSz( wx.Size( 450,450 ), wx.DefaultSize )
 		
 		bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
 		
+		self.mainpanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
+		
 		bSizer26 = wx.BoxSizer( wx.VERTICAL )
 		
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.bgcolor = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
+		self.bgcolor = wx.grid.Grid( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
 		
 		# Grid
 		self.bgcolor.CreateGrid( 2, 8 )
@@ -58,7 +61,7 @@ class MainFrame ( wx.Frame ):
 		
 		bSizer2.Add( self.bgcolor, 1, wx.ALL, 5 )
 		
-		self.fgcolor = wx.grid.Grid( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
+		self.fgcolor = wx.grid.Grid( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
 		
 		# Grid
 		self.fgcolor.CreateGrid( 2, 8 )
@@ -93,27 +96,27 @@ class MainFrame ( wx.Frame ):
 		
 		bSizerDraw = wx.BoxSizer( wx.VERTICAL )
 		
-		self.drawpanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 128,128 ), wx.DOUBLE_BORDER )
+		self.drawpanel = wx.Panel( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.Size( 128,128 ), wx.DOUBLE_BORDER )
 		self.drawpanel.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVECAPTION ) )
 		self.drawpanel.SetMinSize( wx.Size( 16,16 ) )
 		self.drawpanel.SetMaxSize( wx.Size( 1024,1024 ) )
 		
-		bSizerDraw.Add( self.drawpanel, 1, wx.ALIGN_LEFT|wx.ALIGN_TOP|wx.LEFT|wx.SHAPED, 5 )
+		bSizerDraw.Add( self.drawpanel, 0, wx.ALIGN_BOTTOM|wx.EXPAND|wx.SHAPED, 5 )
 		
 		bSizer26.Add( bSizerDraw, 1, wx.ALIGN_CENTER|wx.EXPAND, 5 )
 		
-		bSizer1.Add( bSizer26, 1, wx.EXPAND, 5 )
+		bSizer8.Add( bSizer26, 1, wx.EXPAND, 5 )
 		
 		bSizer25 = wx.BoxSizer( wx.VERTICAL )
 		
-		charsetChoices = [ u"Upper", u"Lower", u"Custom" ]
-		self.charset = wx.Choice( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, charsetChoices, 0 )
+		charsetChoices = [ u"Upper", u"Lower", u"Editing" ]
+		self.charset = wx.Choice( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, charsetChoices, 0 )
 		self.charset.SetSelection( 0 )
 		bSizer25.Add( self.charset, 0, wx.ALL|wx.EXPAND, 5 )
 		
 		bSizer7 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.charchooser = wx.ListCtrl( self, wx.ID_ANY, wx.DefaultPosition, wx.Size( 120,-1 ), wx.LC_REPORT )
+		self.charchooser = wx.ListCtrl( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.Size( 120,-1 ), wx.LC_REPORT )
 		self.charchooser.SetMinSize( wx.Size( 120,-1 ) )
 		self.charchooser.SetMaxSize( wx.Size( 120,-1 ) )
 		
@@ -121,40 +124,51 @@ class MainFrame ( wx.Frame ):
 		
 		bSizer25.Add( bSizer7, 1, wx.ALIGN_RIGHT, 5 )
 		
-		bSizer1.Add( bSizer25, 0, wx.ALIGN_RIGHT|wx.EXPAND, 5 )
+		bSizer8.Add( bSizer25, 0, wx.ALIGN_RIGHT|wx.EXPAND, 5 )
+		
+		self.mainpanel.SetSizer( bSizer8 )
+		self.mainpanel.Layout()
+		bSizer8.Fit( self.mainpanel )
+		bSizer1.Add( self.mainpanel, 1, wx.EXPAND, 5 )
 		
 		self.SetSizer( bSizer1 )
 		self.Layout()
 		self.m_menubar1 = wx.MenuBar( 0 )
 		self.file = wx.Menu()
-		self.menuopen = wx.MenuItem( self.file, wx.ID_ANY, u"Open", wx.EmptyString, wx.ITEM_NORMAL )
+		self.menuopen = wx.MenuItem( self.file, wx.ID_ANY, u"Open", u"Load raw character bitmap.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuopen )
 		
-		self.menusave = wx.MenuItem( self.file, wx.ID_ANY, u"Save", wx.EmptyString, wx.ITEM_NORMAL )
+		self.menusave = wx.MenuItem( self.file, wx.ID_ANY, u"Save", u"Save raw character bitmap.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menusave )
 		
-		self.saveasmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save as...", wx.EmptyString, wx.ITEM_NORMAL )
+		self.saveasmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save as...", u"Save raw character bitmap to a chosen file.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.saveasmenu )
 		
-		self.menuexit = wx.MenuItem( self.file, wx.ID_ANY, u"Exit", wx.EmptyString, wx.ITEM_NORMAL )
+		self.menuexit = wx.MenuItem( self.file, wx.ID_ANY, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		
 		self.m_menubar1.Append( self.file, u"File" ) 
 		
 		self.edit = wx.Menu()
-		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy all from upper", wx.EmptyString, wx.ITEM_NORMAL )
+		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from upper", u"Copy upper case C64 character set  to the editing buffer.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copyupmenu )
 		
-		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy all from lower", wx.EmptyString, wx.ITEM_NORMAL )
+		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from lower", u"Copy upper and lower case C64 character set  to the editing buffer.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copylomenu )
 		
-		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", wx.EmptyString, wx.ITEM_NORMAL )
+		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", u"Copy characters 0-127 to 128-255 and reverse them.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.reversemenu )
 		
-		self.clearallmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Clear all chars", wx.EmptyString, wx.ITEM_NORMAL )
+		self.clearallmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Clear all chars", u"Clear all characters.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.clearallmenu )
 		
 		self.m_menubar1.Append( self.edit, u"Edit" ) 
+		
+		self.help = wx.Menu()
+		self.aboutmenu = wx.MenuItem( self.help, wx.ID_ANY, u"About", wx.EmptyString, wx.ITEM_NORMAL )
+		self.help.AppendItem( self.aboutmenu )
+		
+		self.m_menubar1.Append( self.help, u"Help" ) 
 		
 		self.SetMenuBar( self.m_menubar1 )
 		
@@ -181,6 +195,7 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.copylo, id = self.copylomenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.clearall, id = self.clearallmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.onabout, id = self.aboutmenu.GetId() )
 	
 	def __del__( self ):
 		pass
@@ -233,6 +248,9 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def clearall( self, event ):
+		event.Skip()
+	
+	def onabout( self, event ):
 		event.Skip()
 	
 

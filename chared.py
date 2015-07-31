@@ -2,6 +2,7 @@
 import wx
 import gui
 
+version = '1.0'
 colors = [
         [0,(000,000,000),'black'],
         [1,(255, 255, 255),'white'],
@@ -42,6 +43,7 @@ class CharEditFrame(gui.MainFrame):
         global custchars
         global lochars
         global charbits
+        global version
         gui.MainFrame.__init__(self,parent)
         col=0
         row=0
@@ -74,6 +76,17 @@ class CharEditFrame(gui.MainFrame):
         self.Refresh()
         event.Skip()
 
+    def onabout(self, event):
+        abouttext = 'CharEd version ' + version + """
+
+by mikeri of SCC
+
+http://github.com/mikeri/CharEd
+http://mikeri.net
+http://shish.org
+"""
+        wx.MessageBox( abouttext, "About CharEd", wx.OK )
+            
     def OnClose(self, event):
         print('close')
         self.Destroy()
@@ -96,12 +109,16 @@ class CharEditFrame(gui.MainFrame):
         global custchars
         global upchars
         custchars = upchars
+        self.updatechars()
+        self.drawpanel.Refresh()
         event.Skip()
 
     def copylo(self,event):
         global custchars
         global lochars
         custchars = lochars
+        self.updatechars()
+        self.drawpanel.Refresh()
         event.Skip()
 
     def status(self, text):
@@ -116,6 +133,7 @@ class CharEditFrame(gui.MainFrame):
             reversedbyte = chr(reversedval)
             custchars = custchars + reversedbyte
         self.drawpanel.Refresh()
+        self.updatechars()
         event.Skip()
 
     def savechars(self):
@@ -157,11 +175,14 @@ class CharEditFrame(gui.MainFrame):
                 charfile = open(charfilename,'r')
                 custchars = charfile.read()
                 charfile.close()
+                if len(custchars)<4096:
+                    custchars = custchars.ljust(4096 - len(custchars), '\00')
                 self.status('Loaded charset ' + filename + '.')
             except:
                 self.status('Error loading ' + filename + '!')
         else: self.status('Load cancelled')
         filereq.Destroy()
+        self.updatechars()
 
     def rendercharset(self, charset):
         self.charchooser.ClearAll()
@@ -179,15 +200,23 @@ class CharEditFrame(gui.MainFrame):
             self.charchooser.SetStringItem(pos,1,hex(charnum)[2:])
             self.charchooser.SetStringItem(pos,2,str(charnum))
 
-    def updatechar(self, charnum):
+    def updatechars(self):
         setnum = self.charset.GetSelection()
         if setnum == 2:
             global custchars
-            wxbitmap = wx.BitmapFromBits(chars[charnum*8 : charnum*8+8],8,8,1)
-            wximage = wx.ImageFromBitmap(wxbitmap).Scale(16,16).Mirror()
-            wxbitmap = wx.BitmapFromImage(wximage,1)
-            self.imagelist.Replace(charnum, wxbitmap)
-            self.charchooser.RefreshItem(charnum)
+            #wxbitmap = wx.BitmapFromBits(chars[charnum*8 : charnum*8+8],8,8,1)
+            #wximage = wx.ImageFromBitmap(wxbitmap).Scale(16,16).Mirror()
+            #wxbitmap = wx.BitmapFromImage(wximage,1)
+            #self.imagelist.Replace(charnum, wxbitmap)
+            #self.charchooser.Refresh()
+
+            self.imagelist = wx.ImageList(16,16,1)
+            self.charchooser.SetImageList(self.imagelist,wx.IMAGE_LIST_SMALL)
+            for charnum in range(0,256):
+                wxbitmap = wx.BitmapFromBits(custchars[charnum*8 : charnum*8+8],8,8,1)
+                wximage = wx.ImageFromBitmap(wxbitmap).Scale(16,16).Mirror()
+                wxbitmap = wx.BitmapFromImage(wximage,1)
+                self.imagelist.Add(wxbitmap)
         
     def colormotion(self, event):
         #self.bgcolor.ClearSelection()
@@ -200,11 +229,13 @@ class CharEditFrame(gui.MainFrame):
         clear = '{0:' + chr(0) + '<2048}'
         custchars = clear.format('')
         self.drawpanel.Refresh()
+        self.updatechars()
         event.Skip()
 
     def OnLeftUp(self, event):
         global charnum
         global charset
+        self.updatechars()
         #self.drawpanel.ReleaseMouse()
 
     def OnLeftDown(self, event):
@@ -224,10 +255,11 @@ class CharEditFrame(gui.MainFrame):
         global drawstate
         if event.Dragging() and event.LeftIsDown:
             x, y = event.GetPositionTuple()
-            x = x / blocksize
-            y = y / blocksize
-            if drawstate: self.flipbit(x, y, True)
-            else: self.flipbit(x, y, False)
+            if x > 0 and x < blocksize * 8 and y > 0 and y < blocksize * 8:
+                x = x / blocksize
+                y = y / blocksize
+                if drawstate: self.flipbit(x, y, True)
+                else: self.flipbit(x, y, False)
 
     def bitstate(self, x, y):
         line = charnum * 8 + y
@@ -245,7 +277,7 @@ class CharEditFrame(gui.MainFrame):
             custchars = byte + custchars[1:]
         else:
             custchars = custchars[:charnum * 8 + y] + byte + custchars[charnum * 8 + y + 1:]
-        self.updatechar(charnum)
+        #self.updatechar(charnum)
         #self.pixeldraw(x, y, state)
         self.drawpanel.Refresh()
 
