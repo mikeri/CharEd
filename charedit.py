@@ -62,11 +62,17 @@ class CharEditFrame(gui.MainFrame):
 
         self.Bind(wx.EVT_MENU, self.OnClose, self.menuexit )
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Bind(wx.EVT_PAINT, self.on_paint)
+        self.Bind(wx.EVT_SIZE, self.OnResize)
+        self.drawpanel.Bind(wx.EVT_PAINT, self.on_paint)
         
         self.rendercharset(upchars)
 #        self.fgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
 #        self.bgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
+
+    def OnResize(self, event):
+        self.drawpanel.Refresh()
+        self.Refresh()
+        event.Skip()
 
     def OnClose(self, event):
         print('close')
@@ -109,6 +115,7 @@ class CharEditFrame(gui.MainFrame):
             reversedval = ~byteval & 255
             reversedbyte = chr(reversedval)
             custchars = custchars + reversedbyte
+        self.drawpanel.Refresh()
         event.Skip()
 
     def savechars(self):
@@ -192,6 +199,7 @@ class CharEditFrame(gui.MainFrame):
         global custchars
         clear = '{0:' + chr(0) + '<2048}'
         custchars = clear.format('')
+        self.drawpanel.Refresh()
         event.Skip()
 
     def OnLeftUp(self, event):
@@ -239,7 +247,7 @@ class CharEditFrame(gui.MainFrame):
             custchars = custchars[:charnum * 8 + y] + byte + custchars[charnum * 8 + y + 1:]
         self.updatechar(charnum)
         #self.pixeldraw(x, y, state)
-        self.Refresh()
+        self.drawpanel.Refresh()
 
     def encodebyte(self, bits):
         bitval = 1
@@ -267,6 +275,7 @@ class CharEditFrame(gui.MainFrame):
         charnum = event.Index
         if charnum < 0: charnum = 0
         self.extractchar(charnum)
+        self.drawpanel.Refresh()
         event.Skip()
 
     def on_paint(self, event):
