@@ -138,11 +138,16 @@ class MainFrame ( wx.Frame ):
 		self.menuopen = wx.MenuItem( self.file, wx.ID_ANY, u"Open", u"Load raw character bitmap.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuopen )
 		
+		self.importamiga = wx.MenuItem( self.file, wx.ID_ANY, u"Import Amiga font", u"Import 8x8 bitmap font in Amiga format", wx.ITEM_NORMAL )
+		self.file.AppendItem( self.importamiga )
+		
 		self.menusave = wx.MenuItem( self.file, wx.ID_ANY, u"Save", u"Save raw character bitmap.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menusave )
 		
 		self.saveasmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save as...", u"Save raw character bitmap to a chosen file.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.saveasmenu )
+		
+		self.file.AppendSeparator()
 		
 		self.menuexit = wx.MenuItem( self.file, wx.ID_ANY, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
@@ -189,6 +194,7 @@ class MainFrame ( wx.Frame ):
 		self.charset.Bind( wx.EVT_CHOICE, self.setcharset )
 		self.charchooser.Bind( wx.EVT_LIST_ITEM_FOCUSED, self.setchar )
 		self.Bind( wx.EVT_MENU, self.openfont, id = self.menuopen.GetId() )
+		self.Bind( wx.EVT_MENU, self.openamiga, id = self.importamiga.GetId() )
 		self.Bind( wx.EVT_MENU, self.savefont, id = self.menusave.GetId() )
 		self.Bind( wx.EVT_MENU, self.savefontas, id = self.saveasmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copyup, id = self.copyupmenu.GetId() )
@@ -230,6 +236,9 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def openfont( self, event ):
+		event.Skip()
+	
+	def openamiga( self, event ):
 		event.Skip()
 	
 	def savefont( self, event ):

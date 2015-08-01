@@ -1,6 +1,8 @@
 #!/usr/bin/python
+#coding=latin
 import wx
 import gui
+import struct
 
 version = '1.0'
 colors = [
@@ -101,6 +103,10 @@ http://shish.org
         self.savecharsas()
         event.Skip
 
+    def openamiga(self, event):
+        self.amigaload()
+        event.Skip
+
     def openfont(self, event):
         self.loadchars()
         event.Skip
@@ -163,6 +169,33 @@ http://shish.org
                 self.status('Error saving ' + filename + '!')
         else: self.status('Save cancelled')
         filereq.Destroy()
+
+    def amigaload(self):
+        global charfilename
+        global custchars
+        filereq = wx.FileDialog(self,style=wx.FD_OPEN)
+        if filereq.ShowModal() == wx.ID_OK:
+            charfilename = filereq.GetPath()
+            filename = filereq.GetFilename()
+            try:
+                charfile = open(charfilename,'r')
+                amigafont = charfile.read()
+                charfile.close()
+            except:
+                self.status('Error loading font file!')
+            try:
+                custbuffer = self.loadamiga(amigafont)
+            except:
+                self.status('Error importing Amiga font file! Wrong format?')
+                return
+            custchars = custbuffer
+            if len(custchars)<4096:
+                custchars = custchars.ljust(4096 - len(custchars), '\00')
+            self.status('Imported Amiga font.')
+            charfilename = ''
+        else: self.status('Load cancelled')
+        filereq.Destroy()
+        self.updatechars()
 
     def loadchars(self):
         global charfilename
@@ -383,6 +416,120 @@ http://shish.org
             bit = bit << 1
         bits.reverse()
         return bits
+
+    def loadamiga(self,font):
+        fontsetting = self.readheader(font)
+        if fontsetting['tf_XSize'] == 8 and fontsetting['tf_YSize'] == 8:
+            bitmap = ''
+            location = []
+            charwidth = []
+            # Strip header
+            font = font[32:]
+            lochar = fontsetting['tf_LoChar']
+            hichar = fontsetting['tf_HiChar']
+            length = fontsetting['tf_Modulo']
+            fontpos = fontsetting['tf_CharData']
+            charloc = fontsetting['tf_CharLoc']
+            numchars = hichar - lochar
+            count = 0
+            for char in range(0, numchars*4+4, 4):
+                data = struct.unpack('>HH',font[char+charloc:char+charloc+4])
+                location.append(data[0])
+                charwidth.append(data[1])
+                count += 1
+
+            fontbits = []
+            count = 0
+            for char in range(fontpos,fontpos + length * 8):
+                count += 1
+                bits = self.decodebyte(font[char])
+                fontbits += bits
+
+
+            for char in range(0, numchars):
+                for row in range (0, 8):
+                    #fetchbyte = location[char]/8 + (length * row)
+                    #if char == 0: fetchbyte = 0
+                    #dprint(fetchbyte)
+                    bitlocation = location[char] + (length * 8 * row)
+                    charbits = fontbits[bitlocation:bitlocation+8]
+                    #bitmapbyte = font[fetchbyte]
+                    bitmapbyte = self.encodebyte(charbits)
+                    #bitmap.append(bitmapbyte)
+                    bitmap += bitmapbyte
+            petsciibitmap = self.asciitopetscii(bitmap, lochar, hichar)
+            return petsciibitmap
+        else:
+            self.status("Font is not 8x8, operation cancelled.")
+
+    def bitarray(data):
+        bitarray = []
+        for byte in data:
+            bits = decodebyte(byte)
+            bitarray.append(bits)
+        return bitarray
+
+    def readheader(self,font):
+        header = font[36:][:106]
+        fields = (['ln_Succ'    , 'L'],
+                  ['ln_Pred'    , 'L'],
+                  ['ln_Type'    , 'B'],
+                  ['ln_Pri'     , 'B'],
+                  ['ln_fontName', 'L'],
+                  ['DFH_ID'     , 'H'],
+                  ['Revision'   , 'H'],
+                  ['Segment'    , 'L'],
+                  ['Fontname'   , '32s'],
+                  ['ln_Succ2'   , 'L'],
+                  ['ln_Pred2'   , 'L'],
+                  ['ln_Type2'   , 'B'],
+                  ['ln_Pri2'    , 'B'],
+                  ['ln_fontNam2', 'L'],
+                  ['mn_ReplyPor', 'L'],
+                  ['Reserved'   , 'H'],
+                  ['tf_YSize'   , 'H'],
+                  ['tf_Style'   , 'B'],
+                  ['Flags'      , 'B'],
+                  ['tf_XSize'   , 'H'],
+                  ['tf_Baseline', 'H'],
+                  ['tf_Boldsmea', 'H'],
+                  ['tfAccessors', 'H'],
+                  ['tf_LoChar'  , 'B'],
+                  ['tf_HiChar'  , 'B'],
+                  ['tf_CharData', 'L'],
+                  ['tf_Modulo'  , 'H'],
+                  ['tf_CharLoc' , 'L'],
+                  ['tf_CharSpac', 'L'],
+                  ['tf_CharKern', 'L'])
+        fmtstring = '>'
+        for field in fields:
+            fmtstring = fmtstring + (field[1])
+        values = struct.unpack(fmtstring,header)
+        for field in range(0,len(fields)):
+            fields[field][1]=values[field]
+        return dict(fields)
+
+    def asciitopetscii(self,bitmap,lochar,hichar):
+        global outfile
+        petsciiorder = '@abcdefghijklmnopqrstuvwxyz[£]^_ !"#$%&\'()*+,-./0123456789:;<=>?\\ABCDEFGHIJKLMNOPQRSTUVWXYZ'.decode('utf-8')
+        asciiorder =   ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[£]^_\\abcdefghijklmnopqrstuvwxyz'.decode('utf-8')
+        length = len(petsciiorder)
+        outchars = []
+        offset = 32 - lochar 
+
+        for count in range(0, 255 * 8):
+            outchars.append(0)
+
+        count = 0
+        for char in petsciiorder:
+            asciipos = asciiorder.index(char)
+
+            for line in range(0, 8):
+                outchars[count*8+line] = bitmap[asciipos * 8 + line + offset * 8]
+            count += 1
+
+        petsciichars = ''.join(outchars[:length*8])
+        return petsciichars
 
 app = wx.App(None)
 top = CharEditFrame(None)
