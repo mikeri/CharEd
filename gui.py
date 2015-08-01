@@ -101,7 +101,7 @@ class MainFrame ( wx.Frame ):
 		self.drawpanel.SetMinSize( wx.Size( 16,16 ) )
 		self.drawpanel.SetMaxSize( wx.Size( 1024,1024 ) )
 		
-		bSizerDraw.Add( self.drawpanel, 0, wx.ALIGN_BOTTOM|wx.EXPAND|wx.SHAPED, 5 )
+		bSizerDraw.Add( self.drawpanel, 1, wx.ALIGN_BOTTOM|wx.SHAPED, 5 )
 		
 		bSizer26.Add( bSizerDraw, 1, wx.ALIGN_CENTER|wx.EXPAND, 5 )
 		

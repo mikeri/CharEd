@@ -6,4 +6,4 @@ At the moment it's rather minimal. It only supports hires 1x1 and can only load 
 
 More features hopefully to come soon.
 
-Windows users that does not want to install Python can use the stand alone binary at http://mikeri.net/CharEd.zip.
+Windows users that does not want to install Python can use the stand alone binary at http://mikeri.net/CharEd.zip, but please note that this is not always up to date.
