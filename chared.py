@@ -281,8 +281,7 @@ http://shish.org
 
     def clearall(self,event):
         global custchars
-        clear = '{0:' + chr(0) + '<2048}'
-        custchars = clear.format('')
+        custchars = str(bytearray(2048))
         self.drawpanel.Refresh()
         self.updatechars()
         if event: event.Skip()
