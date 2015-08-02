@@ -5,7 +5,7 @@ import gui
 import struct
 
 # All globals go here
-version = '1.0'
+version = '1.1'
 # C64 color palette
 colors = [
         [0,(000,000,000),'black'],
@@ -59,6 +59,7 @@ class CharEditFrame(gui.MainFrame):
         global lochars
         global charbits
         global version
+        self.changed = False
         gui.MainFrame.__init__(self,parent)
         col=0
         row=0
@@ -67,7 +68,7 @@ class CharEditFrame(gui.MainFrame):
         upchars = orgchars[0:2049]
         lochars = orgchars[2048:4096]
         chars = lochars
-        self.clearall(None)
+        self.new(None)
         self.charbitmaps = []
         self.fgcolor.name = 'fg'
         self.bgcolor.name = 'bg'
@@ -100,6 +101,10 @@ http://shish.org
         wx.MessageBox( abouttext, "About CharEd", wx.OK )
             
     def OnClose(self, event):
+        confirm = wx.MessageDialog(self, "Are you sure? Unsaved changes will be lost!")
+        if self.changed is True: 
+            if confirm.ShowModal() == wx.ID_CANCEL: 
+                return
         self.Destroy()
 
     def copychar(self, event):
@@ -113,6 +118,7 @@ http://shish.org
         custchars = custchars[:charnum * 8] + self.clipbuffer + custchars[(charnum + 1) * 8:]
         self.updatechars()
         self.Refresh()
+        self.changed = True
         event.Skip()
 
     def savefont(self, event):
@@ -133,21 +139,34 @@ http://shish.org
         self.loadchars()
         event.Skip
 
+    def copylo(self,event):
+        global custchars
+        global upchars
+        self.copychars(lochars)
+        self.changed = True
+        event.Skip()
+
     def copyup(self,event):
         global custchars
         global upchars
-        custchars = upchars
-        self.updatechars()
-        self.drawpanel.Refresh()
+        self.copychars(upchars)
+        self.changed = True
         event.Skip()
 
-    def copylo(self,event):
+    def copychars(self, source):
         global custchars
+        global upchars
         global lochars
-        custchars = lochars
+        
+        charnum = self.charchooser.GetFirstSelected()
+        while True:
+            if charnum is -1: break
+            char = source[charnum*8:charnum*8+8]
+            custchars = custchars[:charnum * 8] + char + custchars[(charnum + 1) * 8:]
+            charnum = self.charchooser.GetNextSelected(charnum)
+
         self.updatechars()
-        self.drawpanel.Refresh()
-        event.Skip()
+        self.Refresh()
 
     def status(self, text):
         self.statusbar.SetStatusText(text)
@@ -162,6 +181,7 @@ http://shish.org
             custchars = custchars + reversedbyte
         self.drawpanel.Refresh()
         self.updatechars()
+        self.changed = True
         event.Skip()
 
     def savechars(self):
@@ -172,6 +192,7 @@ http://shish.org
             charfile.write(custchars)
             charfile.close()
             self.status('Saved charset ' + charfilename + '.')
+            self.changed = False
         except:
             self.status('Error saving ' + charfilename + '!')
 
@@ -187,6 +208,7 @@ http://shish.org
                 charfile.write(custchars)
                 charfile.close()
                 self.status('Saved charset ' + filename + '.')
+                self.changed = False
             except:
                 self.status('Error saving ' + filename + '!')
         else: self.status('Save cancelled')
@@ -233,6 +255,7 @@ http://shish.org
                 if len(custchars)<4096:
                     custchars = custchars.ljust(4096 - len(custchars), '\00')
                 self.status('Loaded charset ' + filename + '.')
+                self.changed = False
             except:
                 self.status('Error loading ' + filename + '!')
         else: self.status('Load cancelled')
@@ -279,11 +302,17 @@ http://shish.org
         #pass
         event.Skip()
 
-    def clearall(self,event):
+    def new(self,event):
         global custchars
+        confirm = wx.MessageDialog(self, "Are you sure? Unsaved changes will be lost!")
+        if self.changed is True: 
+            if confirm.ShowModal() == wx.ID_CANCEL: 
+                return
         custchars = str(bytearray(2048))
         self.drawpanel.Refresh()
         self.updatechars()
+        self.changed = False
+        charfilename = ''
         if event: event.Skip()
 
     def OnLeftUp(self, event):
@@ -321,6 +350,7 @@ http://shish.org
         return bits[x]
         
     def flipbit(self, x, y, state):
+        self.changed = True
         global charnum
         global custchars
         line = custchars[charnum * 8 + y]

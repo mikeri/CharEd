@@ -80,6 +80,9 @@ class MainFrame ( wx.Frame ):
 		self.Layout()
 		self.m_menubar1 = wx.MenuBar( 0 )
 		self.file = wx.Menu()
+		self.newmenu = wx.MenuItem( self.file, wx.ID_ANY, u"New", u"Starts a new charset by clearing all characters.", wx.ITEM_NORMAL )
+		self.file.AppendItem( self.newmenu )
+		
 		self.menuopen = wx.MenuItem( self.file, wx.ID_ANY, u"Open", u"Load raw character bitmap.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuopen )
 		
@@ -100,17 +103,14 @@ class MainFrame ( wx.Frame ):
 		self.m_menubar1.Append( self.file, u"File" ) 
 		
 		self.edit = wx.Menu()
-		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from upper", u"Copy upper case C64 character set  to the editing buffer.", wx.ITEM_NORMAL )
+		self.copyupmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Fill with upper kernal", u"Fill selected characters with the upper case kernal chars.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copyupmenu )
 		
-		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy from lower", u"Copy upper and lower case C64 character set  to the editing buffer.", wx.ITEM_NORMAL )
+		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Fill with lower kernal", u"Fill selected characters with the upper/lower case kernal chars.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copylomenu )
 		
 		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", u"Copy characters 0-127 to 128-255 and reverse them.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.reversemenu )
-		
-		self.clearallmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Clear all chars", u"Clear all characters.", wx.ITEM_NORMAL )
-		self.edit.AppendItem( self.clearallmenu )
 		
 		self.edit.AppendSeparator()
 		
@@ -147,6 +147,7 @@ class MainFrame ( wx.Frame ):
 		self.drawpanel.Bind( wx.EVT_MOTION, self.drawmotion )
 		self.charset.Bind( wx.EVT_CHOICE, self.setcharset )
 		self.charchooser.Bind( wx.EVT_LIST_ITEM_FOCUSED, self.setchar )
+		self.Bind( wx.EVT_MENU, self.new, id = self.newmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.openfont, id = self.menuopen.GetId() )
 		self.Bind( wx.EVT_MENU, self.openamiga, id = self.importamiga.GetId() )
 		self.Bind( wx.EVT_MENU, self.savefont, id = self.menusave.GetId() )
@@ -154,7 +155,6 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.copyup, id = self.copyupmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copylo, id = self.copylomenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
-		self.Bind( wx.EVT_MENU, self.clearall, id = self.clearallmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copychar, id = self.copymenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.pastechar, id = self.pastemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.onabout, id = self.aboutmenu.GetId() )
@@ -191,6 +191,9 @@ class MainFrame ( wx.Frame ):
 	def setchar( self, event ):
 		event.Skip()
 	
+	def new( self, event ):
+		event.Skip()
+	
 	def openfont( self, event ):
 		event.Skip()
 	
@@ -210,9 +213,6 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def makereverse( self, event ):
-		event.Skip()
-	
-	def clearall( self, event ):
 		event.Skip()
 	
 	def copychar( self, event ):
