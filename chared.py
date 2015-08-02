@@ -4,7 +4,9 @@ import wx
 import gui
 import struct
 
+# All globals go here
 version = '1.0'
+# C64 color palette
 colors = [
         [0,(000,000,000),'black'],
         [1,(255, 255, 255),'white'],
@@ -22,17 +24,28 @@ colors = [
         [13,(54, 210, 132),'light green'],
         [14,(8, 94, 181),'light blue'],
         [15,(149, 149, 149),'light grey']]
+# Current colors for the editing panel
 bgcolor = 6
 fgcolor = 14
+# Size and the editing panel
 drawsize = 0
-chars = 0
-upchars = 0
-lochars = 0
-custchars = 0
+# Current character buffer
+chars = ''
+# Upper case C64 kernal characters
+upchars = ''
+# Upper and lower case C64 kernal characters
+lochars = ''
+# Character set beeing edited
+custchars = ''
+# Bit array containing all bits
 charbits = []
+# Index number of the character beeing edited
 charnum = 0
+# Real pixel size in editing buffer
 blocksize = 0
+# Filename of loaded charset
 charfilename = ''
+# State of drawing (drawing or editing) when holding the mouse button down
 drawstate = False
 
 for line in range (0,8):
@@ -54,20 +67,17 @@ class CharEditFrame(gui.MainFrame):
         upchars = orgchars[0:2049]
         lochars = orgchars[2048:4096]
         chars = lochars
-        custchars = lochars
+        self.clearall(None)
         self.charbitmaps = []
-        for color in colors:
-            self.bgcolor.SetCellBackgroundColour(row,col,(colors[color[0]][1]))
-            self.fgcolor.SetCellBackgroundColour(row,col,(colors[color[0]][1]))
-            col += 1
-            if col==8:
-                row += 1
-                col = 0
+        self.fgcolor.name = 'fg'
+        self.bgcolor.name = 'bg'
 
         self.Bind(wx.EVT_MENU, self.OnClose, self.menuexit )
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_SIZE, self.OnResize)
         self.drawpanel.Bind(wx.EVT_PAINT, self.on_paint)
+        self.fgcolor.Bind( wx.EVT_LEFT_DOWN, self.setcolor)
+        self.bgcolor.Bind( wx.EVT_LEFT_DOWN, self.setcolor)
         
         self.rendercharset(upchars)
 #        self.fgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
@@ -90,7 +100,6 @@ http://shish.org
         wx.MessageBox( abouttext, "About CharEd", wx.OK )
             
     def OnClose(self, event):
-        print('close')
         self.Destroy()
 
     def copychar(self, event):
@@ -276,7 +285,7 @@ http://shish.org
         custchars = clear.format('')
         self.drawpanel.Refresh()
         self.updatechars()
-        event.Skip()
+        if event: event.Skip()
 
     def OnLeftUp(self, event):
         global charnum
@@ -356,12 +365,57 @@ http://shish.org
         self.drawpanel.Refresh()
         event.Skip()
 
+    def colorchooser_onpaint(self, event):
+        global bgcolor
+        global fgcolor
+
+        # Setup
+        chooser = event.GetEventObject()
+        colorname = chooser.name
+        if colorname == 'bg': color = bgcolor
+        if colorname == 'fg': color = fgcolor
+        chooser.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        dc = wx.AutoBufferedPaintDC(chooser)
+        dc.Clear()
+        x, y = chooser.GetClientSize()
+        x = x / 8 * 8
+        y = y / 2 * 2
+        xblock = x / 8
+        yblock = y / 2
+        chooser.SetClientSize((x, y))
+    
+        for col in range(0,8):
+            dc.SetBrush(wx.Brush(colors[col][1]))
+            xpos = col * xblock
+            if xpos == 0: xpos = 1
+            dc.DrawRectangle(xpos, 0, xpos + xblock, yblock + 1)
+            dc.SetBrush(wx.Brush(colors[col+8][1]))
+            dc.DrawRectangle(xpos, yblock, xpos + xblock, y) 
+
+        if color < 8:
+            cursorxpos = xblock * color
+            cursorypos = 1
+        else:
+            cursorxpos = xblock * (color - 8)
+            cursorypos = yblock
+
+        dc.SetPen(wx.Pen(wx.WHITE, 2))
+        dc.SetBrush(wx.Brush(wx.WHITE, style=wx.TRANSPARENT))
+        dc.DrawRectangle(cursorxpos, cursorypos,
+                xblock, yblock) 
+        
+
+        #for line in range (0, x, x / 8):
+        #    dc.DrawLine(line,0,line,y)
+        #dc.DrawLine(0,y/2,x,y/2)
+
     def on_paint(self, event):
         global bgcolor
         global fgcolor
         global drawsize
         global blocksize
         global charnum
+
         def pixeldraw(x, y, state):
             if state: chardraw.SetBrush(wx.Brush(colors[fgcolor][1]))
             else: chardraw.SetBrush(wx.Brush(colors[bgcolor][1]))
@@ -392,19 +446,24 @@ http://shish.org
             for line in range (0,8):
                 pixeldraw(bit,line,charbits[line][bit])
 
-    def setfgcolor( self, event ):
+    def setcolor(self, event):
             global fgcolor
-            fgcolor = event.GetCol() + 8 * event.GetRow()
-            self.Refresh()
-            self.status("Foreground color: " + colors[fgcolor][2])
-            event.Skip()
-
-    def setbgcolor( self, event ):
             global bgcolor
-            bgcolor = event.GetCol() + 8 * event.GetRow()
+            global colors
+            xpos, ypos = event.GetPositionTuple()
+            chooser = event.GetEventObject()
+            colorname = chooser.name
+            xsize, ysize = chooser.GetClientSize()
+            xzonesize = xsize / 8
+            yzonesize = ysize / 2
+            colornum = xpos / xzonesize + 8 * (ypos / yzonesize)
+            if colorname == 'fg':
+                fgcolor = colornum
+                self.status("Foreground color: " + colors[fgcolor][2])
+            if colorname == 'bg': 
+                bgcolor = colornum
+                self.status("Background color: " + colors[bgcolor][2])
             self.Refresh()
-            self.status("Background color: " + colors[bgcolor][2])
-            event.Skip()
 
     def extractchar(self,charnum):
         global charbits

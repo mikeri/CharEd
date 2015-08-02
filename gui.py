@@ -8,7 +8,8 @@
 ###########################################################################
 
 import wx
-import wx.grid
+
+ID_EXIT = 1000
 
 ###########################################################################
 ## Class MainFrame
@@ -23,76 +24,20 @@ class MainFrame ( wx.Frame ):
 		
 		bSizer1 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.mainpanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.TAB_TRAVERSAL )
+		self.mainpanel = wx.Panel( self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, 0 )
 		bSizer8 = wx.BoxSizer( wx.HORIZONTAL )
 		
 		bSizer26 = wx.BoxSizer( wx.VERTICAL )
 		
 		bSizer2 = wx.BoxSizer( wx.HORIZONTAL )
 		
-		self.bgcolor = wx.grid.Grid( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
+		self.fgcolor = wx.Panel( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.SUNKEN_BORDER|wx.TAB_TRAVERSAL )
+		bSizer2.Add( self.fgcolor, 1, wx.ALL|wx.EXPAND, 5 )
 		
-		# Grid
-		self.bgcolor.CreateGrid( 2, 8 )
-		self.bgcolor.EnableEditing( False )
-		self.bgcolor.EnableGridLines( True )
-		self.bgcolor.SetGridLineColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_3DDKSHADOW ) )
-		self.bgcolor.EnableDragGridSize( False )
-		self.bgcolor.SetMargins( 0, 0 )
+		self.bgcolor = wx.Panel( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.Size( -1,-1 ), wx.SUNKEN_BORDER )
+		bSizer2.Add( self.bgcolor, 1, wx.EXPAND |wx.ALL, 5 )
 		
-		# Columns
-		self.bgcolor.AutoSizeColumns()
-		self.bgcolor.EnableDragColMove( False )
-		self.bgcolor.EnableDragColSize( False )
-		self.bgcolor.SetColLabelSize( 0 )
-		self.bgcolor.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Rows
-		self.bgcolor.EnableDragRowSize( False )
-		self.bgcolor.SetRowLabelSize( 0 )
-		self.bgcolor.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Label Appearance
-		
-		# Cell Defaults
-		self.bgcolor.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-		self.bgcolor.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVEBORDER ) )
-		self.bgcolor.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVECAPTION ) )
-		
-		bSizer2.Add( self.bgcolor, 1, wx.ALL, 5 )
-		
-		self.fgcolor = wx.grid.Grid( self.mainpanel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.SUNKEN_BORDER )
-		
-		# Grid
-		self.fgcolor.CreateGrid( 2, 8 )
-		self.fgcolor.EnableEditing( False )
-		self.fgcolor.EnableGridLines( True )
-		self.fgcolor.SetGridLineColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_3DDKSHADOW ) )
-		self.fgcolor.EnableDragGridSize( False )
-		self.fgcolor.SetMargins( 0, 0 )
-		
-		# Columns
-		self.fgcolor.AutoSizeColumns()
-		self.fgcolor.EnableDragColMove( False )
-		self.fgcolor.EnableDragColSize( False )
-		self.fgcolor.SetColLabelSize( 0 )
-		self.fgcolor.SetColLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Rows
-		self.fgcolor.EnableDragRowSize( False )
-		self.fgcolor.SetRowLabelSize( 0 )
-		self.fgcolor.SetRowLabelAlignment( wx.ALIGN_CENTRE, wx.ALIGN_CENTRE )
-		
-		# Label Appearance
-		
-		# Cell Defaults
-		self.fgcolor.SetDefaultCellAlignment( wx.ALIGN_LEFT, wx.ALIGN_TOP )
-		self.fgcolor.SetForegroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVEBORDER ) )
-		self.fgcolor.SetBackgroundColour( wx.SystemSettings.GetColour( wx.SYS_COLOUR_ACTIVECAPTION ) )
-		
-		bSizer2.Add( self.fgcolor, 1, wx.ALL, 5 )
-		
-		bSizer26.Add( bSizer2, 0, 0, 5 )
+		bSizer26.Add( bSizer2, 1, wx.EXPAND|wx.LEFT, 5 )
 		
 		bSizerDraw = wx.BoxSizer( wx.VERTICAL )
 		
@@ -103,7 +48,7 @@ class MainFrame ( wx.Frame ):
 		
 		bSizerDraw.Add( self.drawpanel, 1, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.SHAPED, 5 )
 		
-		bSizer26.Add( bSizerDraw, 1, wx.ALIGN_CENTER|wx.EXPAND, 5 )
+		bSizer26.Add( bSizerDraw, 6, wx.ALIGN_CENTER|wx.EXPAND, 5 )
 		
 		bSizer8.Add( bSizer26, 1, wx.EXPAND, 5 )
 		
@@ -149,7 +94,7 @@ class MainFrame ( wx.Frame ):
 		
 		self.file.AppendSeparator()
 		
-		self.menuexit = wx.MenuItem( self.file, wx.ID_ANY, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
+		self.menuexit = wx.MenuItem( self.file, ID_EXIT, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		
 		self.m_menubar1.Append( self.file, u"File" ) 
@@ -191,10 +136,10 @@ class MainFrame ( wx.Frame ):
 		self.Centre( wx.BOTH )
 		
 		# Connect Events
-		self.bgcolor.Bind( wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.setbgcolor )
-		self.bgcolor.Bind( wx.EVT_MOTION, self.colormotion )
-		self.fgcolor.Bind( wx.grid.EVT_GRID_CELL_LEFT_CLICK, self.setfgcolor )
-		self.fgcolor.Bind( wx.grid.EVT_GRID_RANGE_SELECT, self.colormotion )
+		self.fgcolor.Bind( wx.EVT_LEFT_UP, self.setfgcolor )
+		self.fgcolor.Bind( wx.EVT_PAINT, self.colorchooser_onpaint )
+		self.bgcolor.Bind( wx.EVT_LEFT_DOWN, self.setbgcolor )
+		self.bgcolor.Bind( wx.EVT_PAINT, self.colorchooser_onpaint )
 		self.drawpanel.Bind( wx.EVT_KEY_DOWN, self.OnLeftDown )
 		self.drawpanel.Bind( wx.EVT_KEY_UP, self.OnLeftDown )
 		self.drawpanel.Bind( wx.EVT_LEFT_DOWN, self.OnLeftDown )
@@ -219,13 +164,13 @@ class MainFrame ( wx.Frame ):
 	
 	
 	# Virtual event handlers, overide them in your derived class
-	def setbgcolor( self, event ):
-		event.Skip()
-	
-	def colormotion( self, event ):
-		event.Skip()
-	
 	def setfgcolor( self, event ):
+		event.Skip()
+	
+	def colorchooser_onpaint( self, event ):
+		event.Skip()
+	
+	def setbgcolor( self, event ):
 		event.Skip()
 	
 	
