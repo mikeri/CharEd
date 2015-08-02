@@ -101,7 +101,7 @@ class MainFrame ( wx.Frame ):
 		self.drawpanel.SetMinSize( wx.Size( 16,16 ) )
 		self.drawpanel.SetMaxSize( wx.Size( 1024,1024 ) )
 		
-		bSizerDraw.Add( self.drawpanel, 1, wx.ALIGN_BOTTOM|wx.SHAPED, 5 )
+		bSizerDraw.Add( self.drawpanel, 1, wx.ALIGN_CENTER_VERTICAL|wx.LEFT|wx.SHAPED, 5 )
 		
 		bSizer26.Add( bSizerDraw, 1, wx.ALIGN_CENTER|wx.EXPAND, 5 )
 		
@@ -167,6 +167,15 @@ class MainFrame ( wx.Frame ):
 		self.clearallmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Clear all chars", u"Clear all characters.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.clearallmenu )
 		
+		self.edit.AppendSeparator()
+		
+		self.copymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy char"+ u"\t" + u"CTRL-C", u"Copy character", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.copymenu )
+		
+		self.pastemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Paste char"+ u"\t" + u"CTRL-V", u"Paste character", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.pastemenu )
+		self.pastemenu.Enable( False )
+		
 		self.m_menubar1.Append( self.edit, u"Edit" ) 
 		
 		self.help = wx.Menu()
@@ -201,6 +210,8 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.copylo, id = self.copylomenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.clearall, id = self.clearallmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.copychar, id = self.copymenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.pastechar, id = self.pastemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.onabout, id = self.aboutmenu.GetId() )
 	
 	def __del__( self ):
@@ -257,6 +268,12 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def clearall( self, event ):
+		event.Skip()
+	
+	def copychar( self, event ):
+		event.Skip()
+	
+	def pastechar( self, event ):
 		event.Skip()
 	
 	def onabout( self, event ):

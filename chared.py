@@ -93,6 +93,19 @@ http://shish.org
         print('close')
         self.Destroy()
 
+    def copychar(self, event):
+        global custchars
+        self.clipbuffer = custchars[charnum*8:charnum*8+8]
+        self.pastemenu.Enable()
+        event.Skip()
+
+    def pastechar(self, event):
+        global custchars
+        custchars = custchars[:charnum * 8] + self.clipbuffer + custchars[(charnum + 1) * 8:]
+        self.updatechars()
+        self.Refresh()
+        event.Skip()
+
     def savefont(self, event):
         global charfilename
         if charfilename: self.savechars()
