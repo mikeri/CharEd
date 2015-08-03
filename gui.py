@@ -97,6 +97,14 @@ class MainFrame ( wx.Frame ):
 		
 		self.file.AppendSeparator()
 		
+		self.loadaddrmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save with load address", wx.EmptyString, wx.ITEM_CHECK )
+		self.file.AppendItem( self.loadaddrmenu )
+		
+		self.loadsubmenu = wx.Menu()
+		self.file.AppendSubMenu( self.loadsubmenu, u"Set load address" )
+		
+		self.file.AppendSeparator()
+		
 		self.menuexit = wx.MenuItem( self.file, ID_EXIT, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		

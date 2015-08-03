@@ -1,6 +1,7 @@
 #!/usr/bin/python
 #coding=latin
 import wx
+import binascii
 import gui
 import struct
 
@@ -47,6 +48,8 @@ blocksize = 0
 charfilename = ''
 # State of drawing (drawing or editing) when holding the mouse button down
 drawstate = False
+# Working directory
+workdir = ''
 
 for line in range (0,8):
     charbits.append([0,0,0,0,0,0,0,0])
@@ -59,6 +62,7 @@ class CharEditFrame(gui.MainFrame):
         global lochars
         global charbits
         global version
+        self.loadaddrsub = []
         self.changed = False
         gui.MainFrame.__init__(self,parent)
         col=0
@@ -83,6 +87,50 @@ class CharEditFrame(gui.MainFrame):
         self.rendercharset(upchars)
 #        self.fgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
 #        self.bgcolor.Bind(wx.EVT_GRID_RANGE_SELECT, self.colormotion) 
+        index = 0
+        itemnum = 0
+        addresses = ['0800',
+                    '2000',
+                    '2800',
+                    '3000',
+                    '3800',
+                    '4000',
+                    '4800',
+                    '5000',
+                    '5800',
+                    '6000',
+                    '6800',
+                    '7000',
+                    '7800',
+                    '8000',
+                    '8800',
+                    'a000',
+                    'a800',
+                    'b000',
+                    'b800',
+                    'c000',
+                    'c800',
+                    'e000',
+                    'e800',
+                    'f000',
+                    'f800']
+        self.loadtable = {}
+        for adr in addresses:
+            self.loadaddrsub.append (wx.MenuItem( self.loadsubmenu, wx.ID_ANY, u"$" + adr, u"Set load addess for charset", wx.ITEM_NORMAL ))
+            index = len(self.loadaddrsub)-1
+            self.loadsubmenu.AppendItem( self.loadaddrsub[index])
+            self.loadtable[index] = adr
+            self.Bind(wx.EVT_MENU, self.setloadaddr, self.loadaddrsub[index] )
+
+    def setloadaddr(self, event):
+        for index in range(0,len(self.loadtable)):
+            item = event.GetId()
+            if item == self.loadaddrsub[index].GetId():
+                displayaddr = self.loadtable[index]
+                self.loadaddr = bytearray(binascii.unhexlify(self.loadtable[index]))
+                self.status('Loadaddress set to: $' + displayaddr)
+                self.loadaddrmenu.Check()
+        event.Skip()
 
     def OnResize(self, event):
         self.drawpanel.Refresh()
@@ -199,12 +247,17 @@ http://shish.org
     def savecharsas(self):
         global custchars
         global charfilename
-        filereq = wx.FileDialog(self,style=wx.FD_SAVE)
+        global workdir
+        global loadaddr
+        filereq = wx.FileDialog(self,style=wx.FD_SAVE,defaultDir=workdir)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
+            workdir = filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'w')
+                if self.loadaddrmenu.IsChecked:
+                    charfile.write(self.loadaddr[::-1])
                 charfile.write(custchars)
                 charfile.close()
                 self.status('Saved charset ' + filename + '.')
@@ -244,17 +297,27 @@ http://shish.org
     def loadchars(self):
         global charfilename
         global custchars
-        filereq = wx.FileDialog(self,style=wx.FD_OPEN)
+        global workdir
+        filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=workdir)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
+            workdir = filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'r')
                 custchars = charfile.read()
                 charfile.close()
-                if len(custchars)<4096:
-                    custchars = custchars.ljust(4096 - len(custchars), '\00')
-                self.status('Loaded charset ' + filename + '.')
+                if len(custchars) < 2048:
+                    custchars = custchars.ljust(2048, '\00')
+                if len(custchars) == 2050:
+                    self.loadaddr = bytearray(custchars[:2])[::-1]
+                    custchars = custchars[2:]
+                    self.status('Loaded charset ' + filename + ' with loaddaress $'
+                                  + binascii.hexlify(self.loadaddr) + '.')
+                    self.loadaddrmenu.Check(True)
+                else:
+                    self.status('Loaded charset ' + filename + '.')
+                    self.loadaddrmenu.Check(False)
                 self.changed = False
             except:
                 self.status('Error loading ' + filename + '!')
