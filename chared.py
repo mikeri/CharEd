@@ -6,7 +6,7 @@ import gui
 import struct
 
 # All globals go here
-version = '1.1'
+version = '1.2'
 # C64 color palette
 colors = [
         [0,(000,000,000),'black'],
@@ -155,6 +155,26 @@ http://shish.org
                 return
         self.Destroy()
 
+    def flipy(self, event):
+        global custchars
+        char = custchars[charnum*8:charnum*8+8]
+        flipped = char[::-1]
+        custchars = custchars[:charnum * 8] + flipped + custchars[(charnum + 1) * 8:]
+        self.Refresh()
+        self.updatechars()
+        event.Skip()
+            
+    def flipx(self, event):
+        global custchars
+        char = custchars[charnum*8:charnum*8+8]
+        flipped = ''
+        for byte in char:
+            flipped = flipped + chr(int('{:08b}'.format(ord(byte))[::-1], 2))
+        custchars = custchars[:charnum * 8] + flipped + custchars[(charnum + 1) * 8:]
+        self.Refresh()
+        self.updatechars()
+        event.Skip()
+
     def copychar(self, event):
         global custchars
         self.clipbuffer = custchars[charnum*8:charnum*8+8]
@@ -237,6 +257,8 @@ http://shish.org
         global charfilename
         try:
             charfile = open(charfilename,'w')
+            if self.loadaddrmenu.IsChecked():
+                charfile.write(self.loadaddr[::-1])
             charfile.write(custchars)
             charfile.close()
             self.status('Saved charset ' + charfilename + '.')
@@ -256,7 +278,7 @@ http://shish.org
             workdir = filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'w')
-                if self.loadaddrmenu.IsChecked:
+                if self.loadaddrmenu.IsChecked():
                     charfile.write(self.loadaddr[::-1])
                 charfile.write(custchars)
                 charfile.close()

@@ -97,7 +97,7 @@ class MainFrame ( wx.Frame ):
 		
 		self.file.AppendSeparator()
 		
-		self.loadaddrmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Save with load address", wx.EmptyString, wx.ITEM_CHECK )
+		self.loadaddrmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Include load address", u"Toggle if load address is prepended to the character data in saving.\n", wx.ITEM_CHECK )
 		self.file.AppendItem( self.loadaddrmenu )
 		
 		self.loadsubmenu = wx.Menu()
@@ -117,17 +117,25 @@ class MainFrame ( wx.Frame ):
 		self.copylomenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Fill with lower kernal", u"Fill selected characters with the upper/lower case kernal chars.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copylomenu )
 		
-		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed chars", u"Copy characters 0-127 to 128-255 and reverse them.", wx.ITEM_NORMAL )
+		self.reversemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Make reversed character set", u"Copy characters 0-127 to 128-255 and reverse them.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.reversemenu )
 		
 		self.edit.AppendSeparator()
 		
-		self.copymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy char"+ u"\t" + u"CTRL-C", u"Copy character", wx.ITEM_NORMAL )
+		self.copymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy character"+ u"\t" + u"CTRL-C", u"Copy current character to buffer.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copymenu )
 		
-		self.pastemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Paste char"+ u"\t" + u"CTRL-V", u"Paste character", wx.ITEM_NORMAL )
+		self.pastemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Paste character"+ u"\t" + u"CTRL-V", u"Paste current character to buffer.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.pastemenu )
 		self.pastemenu.Enable( False )
+		
+		self.edit.AppendSeparator()
+		
+		self.flipxmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip horizontally"+ u"\t" + u"SHIFT-X", u"Mirror character along the horizontal axis.", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.flipxmenu )
+		
+		self.flipymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip vertically"+ u"\t" + u"SHIFT-Y", u"Mirror character along the vertical axis.", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.flipymenu )
 		
 		self.m_menubar1.Append( self.edit, u"Edit" ) 
 		
@@ -165,6 +173,8 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copychar, id = self.copymenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.pastechar, id = self.pastemenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.flipx, id = self.flipxmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.flipy, id = self.flipymenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.onabout, id = self.aboutmenu.GetId() )
 	
 	def __del__( self ):
@@ -227,6 +237,12 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def pastechar( self, event ):
+		event.Skip()
+	
+	def flipx( self, event ):
+		event.Skip()
+	
+	def flipy( self, event ):
 		event.Skip()
 	
 	def onabout( self, event ):
