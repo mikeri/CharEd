@@ -162,6 +162,7 @@ http://shish.org
         custchars = custchars[:charnum * 8] + flipped + custchars[(charnum + 1) * 8:]
         self.Refresh()
         self.updatechars()
+        self.changed = True
         event.Skip()
             
     def flipx(self, event):
@@ -173,6 +174,70 @@ http://shish.org
         custchars = custchars[:charnum * 8] + flipped + custchars[(charnum + 1) * 8:]
         self.Refresh()
         self.updatechars()
+        self.changed = True
+        event.Skip()
+
+    def shift(self, event):
+        global custchars
+
+        def up(char):
+            return char[-7:] + char[0]
+
+        def down(char):
+            return char[7] + char[:7]
+
+        def left(char):
+            shifted = False
+            for byte in char:
+                byteint = ord(byte) << 1
+                if byteint > 255: byteint = (byteint & 255) + 1
+                if not shifted:
+                    shifted = chr(byteint)
+                else:
+                    shifted = shifted + chr(byteint)
+            return shifted
+
+        def right(char):
+            shifted = False
+            carry = False
+            for byte in char:
+                if ord(byte) % 2 > 0 and ord(byte) > 0: carry = True
+                byteint = ord(byte) >> 1
+                if carry:
+                    byteint += 128
+                    carry = False
+                shiftbyte = chr(byteint)
+                if not shifted:
+                    shifted = chr(byteint)
+                else:
+                    shifted = shifted + chr(byteint)
+            return shifted
+
+        char = custchars[charnum*8:charnum*8+8]
+        item = event.GetId()
+        if item == self.upmenu.GetId(): shifted = up(char)
+        if item == self.downmenu.GetId(): shifted = down(char)
+        if item == self.leftmenu.GetId(): shifted = left(char)
+        if item == self.rightmenu.GetId(): shifted = right(char)
+        custchars = custchars[:charnum * 8] + shifted + custchars[(charnum + 1) * 8:]
+        self.Refresh()
+        self.updatechars()
+        self.changed = True
+        event.Skip()
+
+    def reversechar(self, event):
+        global custchars
+        char = custchars[charnum*8:charnum*8+8]
+        reversedchar = ''
+        for byte in char:
+            byteval = ord(byte)
+            reversedval = ~byteval & 255
+            reversedbyte = chr(reversedval)
+            reversedchar = reversedchar + reversedbyte
+        custchars = custchars[:charnum * 8] + reversedchar + custchars[(charnum + 1) * 8:]
+        self.drawpanel.Refresh()
+        self.updatechars()
+        self.changed = True
         event.Skip()
 
     def copychar(self, event):

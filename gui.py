@@ -97,7 +97,7 @@ class MainFrame ( wx.Frame ):
 		
 		self.file.AppendSeparator()
 		
-		self.loadaddrmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Include load address", u"Toggle if load address is prepended to the character data in saving.\n", wx.ITEM_CHECK )
+		self.loadaddrmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Include load address", u"Toggle if load address is prepended to the character data when saving.\n", wx.ITEM_CHECK )
 		self.file.AppendItem( self.loadaddrmenu )
 		
 		self.loadsubmenu = wx.Menu()
@@ -131,11 +131,28 @@ class MainFrame ( wx.Frame ):
 		
 		self.edit.AppendSeparator()
 		
-		self.flipxmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip horizontally"+ u"\t" + u"SHIFT-X", u"Mirror character along the horizontal axis.", wx.ITEM_NORMAL )
+		self.flipxmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip horizontally"+ u"\t" + u"ALT-X", u"Mirror character along the horizontal axis.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.flipxmenu )
 		
-		self.flipymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip vertically"+ u"\t" + u"SHIFT-Y", u"Mirror character along the vertical axis.", wx.ITEM_NORMAL )
+		self.flipymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Flip vertically"+ u"\t" + u"ALT-Y", u"Mirror character along the vertical axis.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.flipymenu )
+		
+		self.reversechmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Reverse character"+ u"\t" + u"ALT-R", u"Reverse (invert) current character", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.reversechmenu )
+		
+		self.edit.AppendSeparator()
+		
+		self.leftmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Shift left"+ u"\t" + u"ALT-H", u"Shift character one bit to the left", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.leftmenu )
+		
+		self.rightmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Shift right"+ u"\t" + u"ALT-L", u"Shift character one bit to the right", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.rightmenu )
+		
+		self.upmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Shift up"+ u"\t" + u"ALT-K", u"Shift character one bit up", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.upmenu )
+		
+		self.downmenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Shift down"+ u"\t" + u"ALT-J", u"Shift character one bit down", wx.ITEM_NORMAL )
+		self.edit.AppendItem( self.downmenu )
 		
 		self.m_menubar1.Append( self.edit, u"Edit" ) 
 		
@@ -175,6 +192,11 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.pastechar, id = self.pastemenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.flipx, id = self.flipxmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.flipy, id = self.flipymenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.reversechar, id = self.reversechmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.shift, id = self.leftmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.shift, id = self.rightmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.shift, id = self.upmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.shift, id = self.downmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.onabout, id = self.aboutmenu.GetId() )
 	
 	def __del__( self ):
@@ -244,6 +266,15 @@ class MainFrame ( wx.Frame ):
 	
 	def flipy( self, event ):
 		event.Skip()
+	
+	def reversechar( self, event ):
+		event.Skip()
+	
+	def shift( self, event ):
+		event.Skip()
+	
+	
+	
 	
 	def onabout( self, event ):
 		event.Skip()
