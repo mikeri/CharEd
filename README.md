@@ -7,5 +7,6 @@ It only supports hires 1x1 chars for now, but it has a few useful features:
 - Import Amiga font files. Only 8x8 bitmap fonts are supported. As far as I know no other similar tools does this.
 - Easily replace or fill selected characters with standard kernal chars, for example PETSCII drawing characters.
 - Quick loadaddress menu.
+- One click preview in emulator or on a real hardware.
 
 More features hopefully to come soon.

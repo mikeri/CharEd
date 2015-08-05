@@ -105,6 +105,9 @@ class MainFrame ( wx.Frame ):
 		
 		self.file.AppendSeparator()
 		
+		self.previewmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Try it!", wx.EmptyString, wx.ITEM_NORMAL )
+		self.file.AppendItem( self.previewmenu )
+		
 		self.menuexit = wx.MenuItem( self.file, ID_EXIT, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		
@@ -185,6 +188,7 @@ class MainFrame ( wx.Frame ):
 		self.Bind( wx.EVT_MENU, self.openamiga, id = self.importamiga.GetId() )
 		self.Bind( wx.EVT_MENU, self.savefont, id = self.menusave.GetId() )
 		self.Bind( wx.EVT_MENU, self.savefontas, id = self.saveasmenu.GetId() )
+		self.Bind( wx.EVT_MENU, self.previewchars, id = self.previewmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copyup, id = self.copyupmenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.copylo, id = self.copylomenu.GetId() )
 		self.Bind( wx.EVT_MENU, self.makereverse, id = self.reversemenu.GetId() )
@@ -244,6 +248,9 @@ class MainFrame ( wx.Frame ):
 		event.Skip()
 	
 	def savefontas( self, event ):
+		event.Skip()
+	
+	def previewchars( self, event ):
 		event.Skip()
 	
 	def copyup( self, event ):

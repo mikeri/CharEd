@@ -1,30 +1,14 @@
 #!/usr/bin/python
 #coding=latin
+import subprocess
 import wx
 import binascii
 import gui
 import struct
+import config
 
 # All globals go here
 version = '1.2'
-# C64 color palette
-colors = [
-        [0,(000,000,000),'black'],
-        [1,(255, 255, 255),'white'],
-        [2,(104, 055, 043),'red'],
-        [3,(112, 164, 178),'cyan'],
-        [4,(111, 061, 134),'purple'],
-        [5,(80, 141, 067),'green'],
-        [6,(040, 040, 121),'blue'],
-        [7,(184, 199, 111),'yellow'],
-        [8,(111, 79, 037),'orange'],
-        [9,(067, 057, 000),'brown'],
-        [10,(154, 103, 89),'pink'],
-        [11,(68, 68, 68),'dark grey'],
-        [12,(108, 108, 108),'grey'],
-        [13,(54, 210, 132),'light green'],
-        [14,(8, 94, 181),'light blue'],
-        [15,(149, 149, 149),'light grey']]
 # Current colors for the editing panel
 bgcolor = 6
 fgcolor = 14
@@ -48,8 +32,6 @@ blocksize = 0
 charfilename = ''
 # State of drawing (drawing or editing) when holding the mouse button down
 drawstate = False
-# Working directory
-workdir = ''
 
 for line in range (0,8):
     charbits.append([0,0,0,0,0,0,0,0])
@@ -317,6 +299,24 @@ http://shish.org
         self.changed = True
         event.Skip()
 
+    def previewchars(self,event):
+        global custchars
+        global charfilename
+        #TODO load previewprg
+        try:
+            prevprgfile = open(config.previewprg,'rb')
+            previewprg = prevprgfile.read()
+            prevprgfile.close()
+            charfile = open(config.tempfile,'w')
+            charfile.write(previewprg)
+            charfile.write(custchars)
+            charfile.close()
+            subprocess.Popen([config.previewcommand, config.tempfile])
+
+            self.status('Sent charset.')
+        except ValueError:
+            self.status('Error sending chars!')
+
     def savechars(self):
         global custchars
         global charfilename
@@ -564,11 +564,11 @@ http://shish.org
         chooser.SetClientSize((x, y))
     
         for col in range(0,8):
-            dc.SetBrush(wx.Brush(colors[col][1]))
+            dc.SetBrush(wx.Brush(config.colors[col][1]))
             xpos = col * xblock
             if xpos == 0: xpos = 1
             dc.DrawRectangle(xpos, 0, xpos + xblock, yblock + 1)
-            dc.SetBrush(wx.Brush(colors[col+8][1]))
+            dc.SetBrush(wx.Brush(config.colors[col+8][1]))
             dc.DrawRectangle(xpos, yblock, xpos + xblock, y) 
 
         if color < 8:
@@ -596,8 +596,8 @@ http://shish.org
         global charnum
 
         def pixeldraw(x, y, state):
-            if state: chardraw.SetBrush(wx.Brush(colors[fgcolor][1]))
-            else: chardraw.SetBrush(wx.Brush(colors[bgcolor][1]))
+            if state: chardraw.SetBrush(wx.Brush(config.colors[fgcolor][1]))
+            else: chardraw.SetBrush(wx.Brush(config.colors[bgcolor][1]))
             blocksize = drawsize / 8
             chardraw.DrawRectangle(x * blocksize, y * blocksize,
                                                          blocksize + 1,blocksize + 1)
@@ -606,7 +606,7 @@ http://shish.org
         self.drawpanel.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
         chardraw = wx.AutoBufferedPaintDC(self.drawpanel)
         #self.chargfx = wx.GraphicsContext.Create(self.chardraw)
-        bgcolorrgb = colors[bgcolor][1]
+        bgcolorrgb = config.colors[bgcolor][1]
         chardraw.SetBackground(wx.Brush(bgcolorrgb))
         chardraw.Clear()
         x, y = self.drawpanel.GetClientSize()
@@ -628,7 +628,6 @@ http://shish.org
     def setcolor(self, event):
             global fgcolor
             global bgcolor
-            global colors
             xpos, ypos = event.GetPositionTuple()
             chooser = event.GetEventObject()
             colorname = chooser.name
@@ -638,10 +637,10 @@ http://shish.org
             colornum = xpos / xzonesize + 8 * (ypos / yzonesize)
             if colorname == 'fg':
                 fgcolor = colornum
-                self.status("Foreground color: " + colors[fgcolor][2])
+                self.status("Foreground color: " + config.colors[fgcolor][2])
             if colorname == 'bg': 
                 bgcolor = colornum
-                self.status("Background color: " + colors[bgcolor][2])
+                self.status("Background color: " + config.colors[bgcolor][2])
             self.Refresh()
 
     def extractchar(self,charnum):
