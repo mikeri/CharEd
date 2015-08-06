@@ -334,13 +334,12 @@ http://shish.org
     def savecharsas(self):
         global custchars
         global charfilename
-        global workdir
         global loadaddr
-        filereq = wx.FileDialog(self,style=wx.FD_SAVE,defaultDir=workdir)
+        filereq = wx.FileDialog(self,style=wx.FD_SAVE,defaultDir=config.workdir)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
-            workdir = filereq.GetDirectory()
+            config.workdir = filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'w')
                 if self.loadaddrmenu.IsChecked():
@@ -384,12 +383,11 @@ http://shish.org
     def loadchars(self):
         global charfilename
         global custchars
-        global workdir
-        filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=workdir)
+        filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=config.workdir)
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
-            workdir = filereq.GetDirectory()
+            config.workdir = filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'r')
                 custchars = charfile.read()
