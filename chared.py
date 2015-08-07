@@ -1,13 +1,17 @@
 #!/usr/bin/python
 #coding=latin
-import subprocess
+# Latin coding because of the asciiorder/petsciiorder lines
+
+import os
 import wx
-import binascii
 import gui
-import struct
 import config
+import struct
+import binascii
+import subprocess
 
 # All globals go here
+# TODO: Remove globals!
 version = '1.2'
 # Current colors for the editing panel
 bgcolor = 6
@@ -44,6 +48,7 @@ class CharEditFrame(gui.MainFrame):
         global lochars
         global charbits
         global version
+        config = self.loadconfig()
         self.loadaddrsub = []
         self.changed = False
         gui.MainFrame.__init__(self,parent)
@@ -72,37 +77,102 @@ class CharEditFrame(gui.MainFrame):
         index = 0
         itemnum = 0
         addresses = ['0800',
-                    '2000',
-                    '2800',
-                    '3000',
-                    '3800',
-                    '4000',
-                    '4800',
-                    '5000',
-                    '5800',
-                    '6000',
-                    '6800',
-                    '7000',
-                    '7800',
-                    '8000',
-                    '8800',
-                    'a000',
-                    'a800',
-                    'b000',
-                    'b800',
-                    'c000',
-                    'c800',
-                    'e000',
-                    'e800',
-                    'f000',
-                    'f800']
+                     '2000', '2800',
+                     '3000', '3800',
+                     '4000', '4800',
+                     '5000', '5800',
+                     '6000', '6800',
+                     '7000', '7800',
+                     '8000', '8800',
+                     'a000', 'a800',
+                     'b000', 'b800',
+                     'c000', 'c800',
+                     'e000', 'e800',
+                     'f000', 'f800']
         self.loadtable = {}
+        # Genereates load address sub menu entries
         for adr in addresses:
             self.loadaddrsub.append (wx.MenuItem( self.loadsubmenu, wx.ID_ANY, u"$" + adr, u"Set load addess for charset", wx.ITEM_NORMAL ))
             index = len(self.loadaddrsub)-1
             self.loadsubmenu.AppendItem( self.loadaddrsub[index])
             self.loadtable[index] = adr
             self.Bind(wx.EVT_MENU, self.setloadaddr, self.loadaddrsub[index] )
+
+    def loadconfig(self):
+        if os.name == 'nt':
+            configdir = os.getenv('APPDATA') + '\\CharEd\\'
+        else:
+            configdir = '~/.config/chared/'
+            configdir = os.path.expanduser(configdir)
+        try:
+            f = open(configdir + 'chared.ini', 'r')
+            config = f.readlines()
+        except:
+            # Pass quietly if config load fails
+            # TODO: Warn if other error than not found
+            config = None
+            pass
+
+        return self.parseconfig(config)
+
+    def parseconfig(self, configfile):
+        self.config = {}    
+        # Default values
+        # C64 color palette
+        self.config['colors'] = [
+                [0,(000,000,000),'black'],
+                [1,(255, 255, 255),'white'],
+                [2,(104, 055, 043),'red'],
+                [3,(112, 164, 178),'cyan'],
+                [4,(111, 061, 134),'purple'],
+                [5,(80, 141, 067),'green'],
+                [6,(040, 040, 121),'blue'],
+                [7,(184, 199, 111),'yellow'],
+                [8,(111, 79, 037),'orange'],
+                [9,(067, 057, 000),'brown'],
+                [10,(154, 103, 89),'pink'],
+                [11,(68, 68, 68),'dark grey'],
+                [12,(108, 108, 108),'grey'],
+                [13,(54, 210, 132),'light green'],
+                [14,(8, 94, 181),'light blue'],
+                [15,(149, 149, 149),'light grey']]
+
+        # Name of the file with the code for char pushing. The charset data will be
+        # appended to this file without load address.
+        self.config['previewprg'] = 'charedpush.prg'
+
+        # Command to run for pushing preview program.
+        self.config['previewcommand'] = 'x64'
+
+        # Default working directory,
+        self.config['workdir'] = ''
+
+        # Temporary file for pushing previews
+        self.config['tempfile'] = 'chartest.prg'
+        if configfile:
+            for line in configfile:
+                fields = line.split('=', 1)
+                if len(fields) == 2 and line[0] is not '#':
+                    self.config[fields[0].strip()] = fields[1].strip()
+
+    def saveconfig(self):
+        if os.name == 'nt':
+            configdir = os.getenv('APPDATA') + '\\CharEd\\'
+        else:
+            configdir = '~/.config/chared/'
+            configdir = os.path.expanduser(configdir)
+        if not os.path.exists(configdir):
+            os.makedirs(configdir)
+            
+        f = open(configdir + 'chared.ini', 'w')
+        for confline in self.config:
+            if not confline == 'colors':
+                try:
+                    parsedconfig = confline + ' = ' + self.config[confline] + '\n'
+                    f.write(parsedconfig)
+                except:
+                    pass
+        f.close()
 
     def setloadaddr(self, event):
         for index in range(0,len(self.loadtable)):
@@ -135,6 +205,7 @@ http://shish.org
         if self.changed is True: 
             if confirm.ShowModal() == wx.ID_CANCEL: 
                 return
+        self.saveconfig()
         self.Destroy()
 
     def flipy(self, event):
@@ -304,14 +375,14 @@ http://shish.org
         global charfilename
         #TODO load previewprg
         try:
-            prevprgfile = open(config.previewprg,'rb')
+            prevprgfile = open(self.config['previewprg'],'rb')
             previewprg = prevprgfile.read()
             prevprgfile.close()
-            charfile = open(config.tempfile,'w')
+            charfile = open(self.config['tempfile'],'w')
             charfile.write(previewprg)
             charfile.write(custchars)
             charfile.close()
-            subprocess.Popen([config.previewcommand, config.tempfile])
+            subprocess.Popen([self.config['previewcommand'], self.config['tempfile']])
 
             self.status('Sent charset.')
         except ValueError:
@@ -335,11 +406,11 @@ http://shish.org
         global custchars
         global charfilename
         global loadaddr
-        filereq = wx.FileDialog(self,style=wx.FD_SAVE,defaultDir=config.workdir)
+        filereq = wx.FileDialog(self,style=wx.FD_SAVE,defaultDir=self.config['workdir'])
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
-            config.workdir = filereq.GetDirectory()
+            self.config['workdir']= filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'w')
                 if self.loadaddrmenu.IsChecked():
@@ -383,11 +454,11 @@ http://shish.org
     def loadchars(self):
         global charfilename
         global custchars
-        filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=config.workdir)
+        filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=self.config['workdir'])
         if filereq.ShowModal() == wx.ID_OK:
             charfilename = filereq.GetPath()
             filename = filereq.GetFilename()
-            config.workdir = filereq.GetDirectory()
+            self.config['workdir']= filereq.GetDirectory()
             try:
                 charfile = open(charfilename,'r')
                 custchars = charfile.read()
@@ -562,11 +633,11 @@ http://shish.org
         chooser.SetClientSize((x, y))
     
         for col in range(0,8):
-            dc.SetBrush(wx.Brush(config.colors[col][1]))
+            dc.SetBrush(wx.Brush(self.config['colors'][col][1]))
             xpos = col * xblock
             if xpos == 0: xpos = 1
             dc.DrawRectangle(xpos, 0, xpos + xblock, yblock + 1)
-            dc.SetBrush(wx.Brush(config.colors[col+8][1]))
+            dc.SetBrush(wx.Brush(self.config['colors'][col+8][1]))
             dc.DrawRectangle(xpos, yblock, xpos + xblock, y) 
 
         if color < 8:
@@ -594,8 +665,8 @@ http://shish.org
         global charnum
 
         def pixeldraw(x, y, state):
-            if state: chardraw.SetBrush(wx.Brush(config.colors[fgcolor][1]))
-            else: chardraw.SetBrush(wx.Brush(config.colors[bgcolor][1]))
+            if state: chardraw.SetBrush(wx.Brush(self.config['colors'][fgcolor][1]))
+            else: chardraw.SetBrush(wx.Brush(self.config['colors'][bgcolor][1]))
             blocksize = drawsize / 8
             chardraw.DrawRectangle(x * blocksize, y * blocksize,
                                                          blocksize + 1,blocksize + 1)
@@ -604,7 +675,7 @@ http://shish.org
         self.drawpanel.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
         chardraw = wx.AutoBufferedPaintDC(self.drawpanel)
         #self.chargfx = wx.GraphicsContext.Create(self.chardraw)
-        bgcolorrgb = config.colors[bgcolor][1]
+        bgcolorrgb = self.config['colors'][bgcolor][1]
         chardraw.SetBackground(wx.Brush(bgcolorrgb))
         chardraw.Clear()
         x, y = self.drawpanel.GetClientSize()
@@ -635,10 +706,10 @@ http://shish.org
             colornum = xpos / xzonesize + 8 * (ypos / yzonesize)
             if colorname == 'fg':
                 fgcolor = colornum
-                self.status("Foreground color: " + config.colors[fgcolor][2])
+                self.status("Foreground color: " + self.config['colors'][fgcolor][2])
             if colorname == 'bg': 
                 bgcolor = colornum
-                self.status("Background color: " + config.colors[bgcolor][2])
+                self.status("Background color: " + self.config['colors'][bgcolor][2])
             self.Refresh()
 
     def extractchar(self,charnum):

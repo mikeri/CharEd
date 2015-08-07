@@ -108,6 +108,8 @@ class MainFrame ( wx.Frame ):
 		self.previewmenu = wx.MenuItem( self.file, wx.ID_ANY, u"Try it!", wx.EmptyString, wx.ITEM_NORMAL )
 		self.file.AppendItem( self.previewmenu )
 		
+		self.file.AppendSeparator()
+		
 		self.menuexit = wx.MenuItem( self.file, ID_EXIT, u"Exit", u"Exit program.", wx.ITEM_NORMAL )
 		self.file.AppendItem( self.menuexit )
 		
