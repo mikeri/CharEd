@@ -5,7 +5,6 @@
 import os
 import wx
 import gui
-import config
 import struct
 import binascii
 import subprocess
