@@ -130,7 +130,7 @@ class MainFrame ( wx.Frame ):
 		self.copymenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Copy character"+ u"\t" + u"CTRL-C", u"Copy current character to buffer.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.copymenu )
 		
-		self.pastemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Paste character"+ u"\t" + u"CTRL-V", u"Paste current character to buffer.", wx.ITEM_NORMAL )
+		self.pastemenu = wx.MenuItem( self.edit, wx.ID_ANY, u"Paste character"+ u"\t" + u"CTRL-V", u"Paste buffer to current character.", wx.ITEM_NORMAL )
 		self.edit.AppendItem( self.pastemenu )
 		self.pastemenu.Enable( False )
 		

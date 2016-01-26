@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #coding=latin
 # Latin coding because of the asciiorder/petsciiorder lines
-
 import os
 import wx
 import gui
@@ -51,8 +50,8 @@ class CharEditFrame(gui.MainFrame):
         self.loadaddrsub = []
         self.changed = False
         gui.MainFrame.__init__(self,parent)
-        col=0
-        row=0
+        col = 0
+        row = 0 
         charfile = open("chars.raw",'r')
         orgchars = charfile.read()
         upchars = orgchars[0:2049]
@@ -63,7 +62,7 @@ class CharEditFrame(gui.MainFrame):
         self.fgcolor.name = 'fg'
         self.bgcolor.name = 'bg'
 
-        self.Bind(wx.EVT_MENU, self.OnClose, self.menuexit )
+        self.Bind(wx.EVT_MENU, self.OnClose, self.menuexit)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Bind(wx.EVT_SIZE, self.OnResize)
         self.drawpanel.Bind(wx.EVT_PAINT, self.on_paint)
@@ -199,11 +198,15 @@ http://shish.org
 """
         wx.MessageBox( abouttext, "About CharEd", wx.OK )
             
-    def OnClose(self, event):
+    def confirmloose(self):
         confirm = wx.MessageDialog(self, "Are you sure? Unsaved changes will be lost!")
         if self.changed is True: 
             if confirm.ShowModal() == wx.ID_CANCEL: 
-                return
+                return True
+
+    def OnClose(self, event):
+        if self.confirmloose():
+            return
         self.saveconfig()
         self.Destroy()
 
@@ -424,6 +427,8 @@ http://shish.org
         filereq.Destroy()
 
     def amigaload(self):
+        if self.confirmloose():
+            return
         global charfilename
         global custchars
         filereq = wx.FileDialog(self,style=wx.FD_OPEN)
@@ -451,6 +456,8 @@ http://shish.org
         self.updatechars()
 
     def loadchars(self):
+        if self.confirmloose():
+            return
         global charfilename
         global custchars
         filereq = wx.FileDialog(self,style=wx.FD_OPEN,defaultDir=self.config['workdir'])
